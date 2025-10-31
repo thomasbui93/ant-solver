@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -30,50 +29,34 @@ func NewSolver(logger *zap.Logger, folderPath string) *Solver {
 }
 
 func (s *Solver) Load() error {
-	files, err := os.ReadDir(s.folderPath)
+	absPath, err := filepath.Abs(s.folderPath)
+	files, err := os.ReadDir(absPath)
 	if err != nil {
 		return err
 	}
-
-	ch := make(chan string)
-
-	// number of workers to process words concurrently
-	numWorkers := runtime.NumCPU() // or any number you like
-
-	var consumers sync.WaitGroup
-	for _ = range numWorkers {
-		consumers.Go(func() {
-			for word := range ch {
-				s.processWord(word)
+	var wg sync.WaitGroup
+	localMaps := make([]map[string][]string, len(files))
+	for i, file := range files {
+		wg.Add(1)
+		go func(file os.DirEntry) {
+			defer wg.Done()
+			filePath := filepath.Join(s.folderPath, file.Name())
+			wi := NewWordsImporter(s.logger, filePath)
+			localMap, err := wi.ReadWords()
+			if err != nil {
+				s.logger.Error("Failed to read words from file", zap.String("file", file.Name()))
 			}
-		})
+			localMaps[i] = localMap
+		}(file)
 	}
 
-	// --- PRODUCERS ---
-	var producerWG sync.WaitGroup
-	for _, file := range files {
-		if !file.IsDir() {
-			producerWG.Add(1)
-			go func(file os.DirEntry) {
-				defer producerWG.Done()
-				filePath := filepath.Join(s.folderPath, file.Name())
-				wi := NewWordsImporter(s.logger, filePath, ch)
-				if err := wi.ReadWords(); err != nil {
-					s.logger.Error("Failed to read words from file", zap.String("file", file.Name()))
-				}
-			}(file)
+	// wait for files processed
+	wg.Wait()
+	for _, lm := range localMaps {
+		for hash, words := range lm {
+			s.hd[hash] = append(s.hd[hash], words...)
 		}
 	}
-
-	// close channel after all producers done
-	go func() {
-		producerWG.Wait()
-		close(ch)
-	}()
-
-	// wait for consumers to finish
-	consumers.Wait()
-
 	return nil
 }
 
@@ -133,23 +116,6 @@ func combinations(n, k int, start int, curr []int, all *[][]int) {
 		combinations(n, k, i+1, curr, all)
 		curr = curr[:len(curr)-1]
 	}
-}
-
-func (s *Solver) processWord(word string) error {
-	hash, err := calHash(word)
-	if err != nil {
-		return err
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	val, exist := s.hd[hash]
-	if exist {
-		s.hd[hash] = append(val, word)
-	} else {
-		s.hd[hash] = []string{word}
-	}
-
-	return nil
 }
 
 func calHash(word string) (string, error) {
