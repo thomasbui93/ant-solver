@@ -54,6 +54,11 @@ func (h *HTTPServer) Start() {
 		w.Write(jsonData)
 	})
 
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		w.Write([]byte("ok"))
+	})
+
 	h.logger.Info(fmt.Sprintf("Running the server at %d port", PORT))
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil); err != nil {
 		h.logger.Error(fmt.Sprintf("Failed to start the server at %d port", PORT))
