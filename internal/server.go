@@ -30,7 +30,13 @@ func NewHTTPServer(logger *zap.Logger, solver *Solver) *HTTPServer {
 func (h *HTTPServer) Start() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query().Get("q")
-		cacheKey, err := calHash(q)
+		l := r.URL.Query().Get("size")
+		s := r.URL.Query().Get("start")
+		e := r.URL.Query().Get("end")
+
+		cond := getCond(l, s, e)
+
+		cacheKey, err := getCacheKey(q, cond)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -38,7 +44,7 @@ func (h *HTTPServer) Start() {
 
 		results, ok := h.cache.Get(cacheKey)
 		if !ok {
-			results = h.solver.GetValidAnagrams(q)
+			results = h.solver.GetValidAnagramsAdvanced(q, cond)
 			h.cache.Add(cacheKey, results)
 		}
 
