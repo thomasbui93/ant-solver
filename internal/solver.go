@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -18,6 +19,12 @@ type Solver struct {
 	logger     *zap.Logger
 	hd         map[string][]string
 	mu         sync.RWMutex
+}
+
+type WordConditions struct {
+	wordLength int
+	startWith  string
+	endWith    string
 }
 
 func NewSolver(logger *zap.Logger, folderPath string) *Solver {
@@ -104,6 +111,43 @@ func (s *Solver) GetValidAnagrams(word string) map[int][]string {
 	return final
 }
 
+func (s *Solver) GetValidAnagramsAdvanced(word string, cond *WordConditions) map[int][]string {
+	set := s.GetValidAnagrams(word)
+
+	if cond == nil {
+		return set
+	}
+
+	hasLengthFilter := cond.wordLength >= 3
+
+	if hasLengthFilter {
+		return map[int][]string{
+			cond.wordLength: filterLetter(set[cond.wordLength], cond),
+		}
+	}
+	for wordLength, words := range set {
+		set[wordLength] = filterLetter(words, cond)
+	}
+	return set
+}
+
+func filterLetter(words []string, cond *WordConditions) []string {
+	hasStart := cond.startWith != ""
+	hasEnd := cond.endWith != ""
+
+	ans := make([]string, 0, len(words))
+	for _, word := range words {
+		if hasStart && word[0] != cond.startWith[0] {
+			continue
+		}
+		if hasEnd && word[len(word)-1] != cond.endWith[0] {
+			continue
+		}
+		ans = append(ans, word)
+	}
+	return ans
+}
+
 func combinations(n, k int, start int, curr []int, all *[][]int) {
 	if len(curr) == k {
 		comb := make([]int, k)
@@ -128,6 +172,31 @@ func calHash(word string) (string, error) {
 		}
 	}
 	return freqKey(freq), nil
+}
+
+func getCacheKey(word string, cond *WordConditions) (string, error) {
+	hash, err := calHash(word)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s|%d|%s|%s", hash, cond.wordLength, cond.startWith, cond.endWith), nil
+}
+
+func getCond(size string, start string, end string) *WordConditions {
+	wordLength, err := strconv.Atoi(size)
+	if err != nil {
+		return &WordConditions{
+			wordLength: 0,
+			startWith:  start,
+			endWith:    end,
+		}
+	}
+
+	return &WordConditions{
+		wordLength: wordLength,
+		startWith:  start,
+		endWith:    end,
+	}
 }
 
 func freqKey(freq [ALPHABET]int) string {
