@@ -28,7 +28,9 @@ func NewHTTPServer(logger *zap.Logger, solver *Solver) *HTTPServer {
 }
 
 func (h *HTTPServer) Start() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.HandleFunc("/api/unscramble", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query().Get("q")
 		cacheKey, err := calHash(q)
 		if err != nil {

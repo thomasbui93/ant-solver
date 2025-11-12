@@ -9,7 +9,10 @@ import (
 )
 
 func main() {
-	logger, _ := zap.NewDevelopment()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
 	defer logger.Sync()
 	start := time.Now()
 	solver := internal.NewSolver(logger, "./assets")
