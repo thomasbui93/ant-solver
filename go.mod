@@ -3,6 +3,7 @@ module antsolver
 go 1.25.0
 
 require (
+	github.com/NYTimes/gziphandler v1.1.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	go.uber.org/zap v1.27.0
 )

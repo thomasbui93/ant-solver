@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/NYTimes/gziphandler"
 	"github.com/hashicorp/golang-lru/v2/expirable"
 	"go.uber.org/zap"
 )
@@ -28,8 +29,13 @@ func NewHTTPServer(logger *zap.Logger, solver *Solver) *HTTPServer {
 }
 
 func (h *HTTPServer) Start() {
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	static := http.FileServer(http.Dir("./static"))
+	withCache := http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		static.ServeHTTP(w, r)
+	}))
+	http.Handle("/static/", gziphandler.GzipHandler(withCache))
+
 	http.HandleFunc("/api/unscramble", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query().Get("q")
 		cacheKey, err := calHash(q)
