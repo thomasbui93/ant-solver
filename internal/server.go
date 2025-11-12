@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
@@ -37,6 +38,11 @@ func (h *HTTPServer) Start() {
 		l := r.URL.Query().Get("size")
 		s := r.URL.Query().Get("start")
 		e := r.URL.Query().Get("end")
+
+		if len(q) == 0 {
+			http.Error(w, "empty query string is fobidden", http.StatusBadRequest)
+		}
+		q = strings.ToLower(q)
 
 		cond := getCond(l, s, e)
 
