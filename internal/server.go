@@ -29,6 +29,10 @@ func NewHTTPServer(logger *zap.Logger, solver *Solver) *HTTPServer {
 
 func (h *HTTPServer) Start() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.min.html")
+	})
+
+	http.HandleFunc("/api/unscramble", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query().Get("q")
 		l := r.URL.Query().Get("size")
 		s := r.URL.Query().Get("start")
