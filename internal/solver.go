@@ -187,15 +187,15 @@ func getCond(size string, start string, end string) *WordConditions {
 	if err != nil {
 		return &WordConditions{
 			wordLength: 0,
-			startWith:  start,
-			endWith:    end,
+			startWith:  strings.ToLower(start),
+			endWith:    strings.ToLower(end),
 		}
 	}
 
 	return &WordConditions{
 		wordLength: wordLength,
-		startWith:  start,
-		endWith:    end,
+		startWith:  strings.ToLower(start),
+		endWith:    strings.ToLower(end),
 	}
 }
 
