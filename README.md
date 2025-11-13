@@ -1,4 +1,4 @@
-# 🐜 ant-solver
+# Ant Solver: A word unscramber
 
 [![Go version](https://img.shields.io/badge/go-1.x-blue.svg)](#)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](#)
@@ -7,11 +7,11 @@
 A lightweight **Golang** server that generates valid **subsequential anagrams** —
 words that can be formed by taking letters from an input string **in order**, possibly skipping some.
 
-🕹️ **Live demo:** [https://ant-solver.onrender.com](https://ant-solver.onrender.com)
+**Live demo:** [https://ant-solver.onrender.com](https://ant-solver.onrender.com)
 
 ---
 
-## 📖 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Example](#example)
@@ -25,7 +25,7 @@ words that can be formed by taking letters from an input string **in order**, po
 
 ---
 
-## 🧩 Overview
+## Overview
 
 `ant-solver` computes all **valid dictionary words** that can be formed as subsequences of a given input word.
 Unlike full anagrams (which must use all letters exactly once), **subsequential anagrams** maintain the **relative letter order** but may skip letters.
@@ -34,14 +34,14 @@ For example, from `"tamponh"` you can form `"phantom"` by choosing letters in or
 
 ---
 
-## 💡 Example
+## Example
 
 Try it live:
 
 **Request:**
 ```
 
-[https://ant-solver.onrender.com/?q=tamponh](https://ant-solver.onrender.com/?q=tamponh)
+[https://ant-solver.onrender.com/api/unscrambe/?q=tamponh](https://ant-solver.onrender.com/api/unscrambe?q=tamponh)
 
 ````
 
@@ -60,17 +60,17 @@ Each key corresponds to the **word length**, and values are the list of subseque
 
 ---
 
-## ⚙️ Features
+## Features
 
-* 🔍 Finds **all** valid subsequential anagrams from a dictionary
-* ⚡ Fast and memory-efficient Go implementation
-* 🌐 Simple HTTP API
-* 🧱 Easily deployable (e.g. Render, Fly.io, Railway)
-* 📦 No external dependencies beyond the Go standard library
+* Finds **all** valid subsequential anagrams from a dictionary
+* Fast and memory-efficient Go implementation
+* Simple HTTP API
+* Easily deployable (e.g. Render, Fly.io, Railway)
+* No external dependencies beyond the Go standard library
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ```bash
 git clone https://github.com/thomasbui93/ant-solver.git
@@ -80,7 +80,7 @@ go build -o ant-solver .
 
 ---
 
-## 🧭 Usage
+## Usage
 
 Run the server locally:
 
@@ -98,7 +98,7 @@ curl "http://localhost:3000/?q=example"
 
 ---
 
-## 🔌 API
+## API
 
 ### `GET /`
 
@@ -126,7 +126,7 @@ curl "http://localhost:3000/?q=example"
 
 ---
 
-## 🧠 Design
+## Design
 
 ### Algorithm
 
@@ -145,7 +145,7 @@ assets/            # Word lists / static data
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome!
 
@@ -155,7 +155,7 @@ Contributions are welcome!
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
 
@@ -163,4 +163,4 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
 
 Built with ❤️ in Go.
 
-> “Find the hidden words your letters can tell.” 🐜
+> “Find the hidden words your letters can tell.”
