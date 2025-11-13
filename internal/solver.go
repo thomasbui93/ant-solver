@@ -12,7 +12,7 @@ import (
 )
 
 const ALPHABET = 26
-const MAX_WORD_LEN = 7
+const MAX_WORD_LEN = 8
 
 type Solver struct {
 	folderPath string
