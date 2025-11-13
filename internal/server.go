@@ -35,7 +35,7 @@ func (h *HTTPServer) Start() {
 
 	http.HandleFunc("/api/unscramble", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query().Get("q")
-		l := r.URL.Query().Get("size")
+		l := r.URL.Query().Get("length")
 		s := r.URL.Query().Get("start")
 		e := r.URL.Query().Get("end")
 
