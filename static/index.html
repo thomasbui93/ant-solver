@@ -176,6 +176,20 @@
             const modalOverlay = document.getElementById("modalOverlay");
             const modalContent = document.getElementById("modalContent");
             const closeModal = document.getElementById("closeModal");
+            const definitionCache = new Map();
+
+            async function getDefinitions(word) {
+                if (definitionCache.has(word)) {
+                    return definitionCache.get(word);
+                }
+                const res = await fetch(
+                    `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
+                );
+                if (!res.ok) throw new Error("No definition found");
+                const data = await res.json();
+                definitionCache.set(word, data);
+                return data;
+            }
 
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -232,11 +246,7 @@
                 modalOverlay.style.display = "flex";
 
                 try {
-                    const res = await fetch(
-                        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-                    );
-                    if (!res.ok) throw new Error("No definition found");
-                    const data = await res.json();
+                    const data = await getDefinitions(word);
                     renderDefinitions(data, word);
                 } catch (err) {
                     modalContent.innerHTML = `<h2>${word}</h2><p style='color:#999'>No definition found.</p>`;
