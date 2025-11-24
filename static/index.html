@@ -28,6 +28,7 @@
                 gap: 10px;
             }
             input {
+                text-transform: uppercase;
                 padding: 10px;
                 border: 1px solid #ccc;
                 border-radius: 6px;
@@ -121,7 +122,7 @@
     <body>
         <div class="container">
             <h1>Word Unscrambler</h1>
-            <form id="unscrambleForm">
+            <form id="unscrambleForm" style="display: grid; gap: 10px">
                 <input
                     type="text"
                     id="q"
@@ -140,7 +141,17 @@
                     placeholder="Length (optional)"
                     min="1"
                 />
-                <button type="submit">Unscramble</button>
+
+                <div style="display: flex; gap: 10px">
+                    <button type="submit" style="flex: 1">Unscramble</button>
+                    <button
+                        type="button"
+                        id="clearBtn"
+                        style="flex: 1; background: #999"
+                    >
+                        Clear
+                    </button>
+                </div>
             </form>
 
             <div
@@ -165,7 +176,6 @@
             const modalOverlay = document.getElementById("modalOverlay");
             const modalContent = document.getElementById("modalContent");
             const closeModal = document.getElementById("closeModal");
-            const definitionCache = new Map();
 
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -198,7 +208,7 @@
                         return;
                     }
 
-                    for (const len of Object.keys(data).sort((a, b) => a - b)) {
+                    for (const len of Object.keys(data).sort((a, b) => b - a)) {
                         const group = document.createElement("div");
                         group.className = "group";
                         const listItems = data[len]
@@ -222,25 +232,16 @@
                 modalOverlay.style.display = "flex";
 
                 try {
-                    const data = await getDefinitions(word);
+                    const res = await fetch(
+                        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
+                    );
+                    if (!res.ok) throw new Error("No definition found");
+                    const data = await res.json();
                     renderDefinitions(data, word);
                 } catch (err) {
                     modalContent.innerHTML = `<h2>${word}</h2><p style='color:#999'>No definition found.</p>`;
                 }
             });
-
-            async function getDefinitions(word) {
-                if (definitionCache.has(word)) {
-                    return definitionCache.get(word);
-                }
-                const res = await fetch(
-                    `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-                );
-                if (!res.ok) throw new Error("No definition found");
-                const data = await res.json();
-                definitionCache.set(word, data);
-                return data;
-            }
 
             function renderDefinitions(entries, word) {
                 let html = `<h2>${word}</h2>`;
@@ -266,6 +267,17 @@
             modalOverlay.addEventListener("click", (e) => {
                 if (e.target === modalOverlay)
                     modalOverlay.style.display = "none";
+            });
+
+            // Clear button
+            const clearBtn = document.getElementById("clearBtn");
+            clearBtn.addEventListener("click", () => {
+                document.getElementById("q").value = "";
+                document.getElementById("start").value = "";
+                document.getElementById("end").value = "";
+                document.getElementById("length").value = "";
+                resultsEl.innerHTML = "";
+                statusEl.textContent = "";
             });
         </script>
     </body>
